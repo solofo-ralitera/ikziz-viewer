@@ -1,4 +1,4 @@
-let IMAGE_LIMIT = 20;
+let IMAGE_LIMIT = 40;
 let IMG_FILTER = "";
 
 $(function () {
@@ -98,24 +98,38 @@ function addItem(item) {
     newItem.setAttribute('data-path', item.path);
     newItem.setAttribute('data-uuid', item.uuid);
     newItem.className = "item";
-    newItem.innerHTML = '<img src="'+ APIURI + "/image" + item.thumb +'">';
-    newItem.onclick = function() {
-        let path = $(this).attr('data-path');
-        let uuid = $(this).attr('data-uuid');
-        loadSlider(path, uuid);
-    };
+    $(newItem).append('<img src="'+ APIURI + "/image" + item.thumb +'">');
+    $(newItem).append(
+        '<div class="footer">' +
+            '<i class="glyphicon glyphicon-thumbs-up setthumbsup"></i>'+
+            '&nbsp;' +
+            '<i class="glyphicon glyphicon-heart-empty setheart"></i>'+
+            '&nbsp;' +
+            '<i class="glyphicon glyphicon-shopping-cart setshoppingcart"></i>'+
+        '</div>'
+    );
+    $(newItem).find("img")
+        .attr('data-path', item.path)
+        .attr('data-uuid', item.uuid)
+        .click(function(el) {
+            let path = $(el.target).attr('data-path');
+            let uuid = $(el.target).attr('data-uuid');
+            loadSlider(path, uuid);
+        });
     document.getElementById("imagesgallery").appendChild(newItem);
 
 }
 
 function setBgImg() {
     let items = $("#container").find("img");
-    let item = items[Math.floor(Math.random()*items.length)];
-    $("body,html").css({
-        "background-image" : "url(" + $(item).attr("src") + ")",
-        "background-size": "100%",
-        "background-repeat": "repeat-y",
-    });
+    if(items.length > 0) {
+        let item = items[Math.floor(Math.random()*items.length)];
+        $("body,html").css({
+            "background-image" : "url(" + $(item).attr("src") + ")",
+            "background-size": "100%",
+            "background-repeat": "repeat-y",
+        });
+    }
 }
 
 function loadSlider(path, uuid) {
@@ -126,10 +140,10 @@ function loadSlider(path, uuid) {
 
         let str = "";
         items.files.forEach(function(img) {
-            str += '<a class="gallery" href="' + APIURI + '/image' + img + '" title="' + items.author + " - " + items.title + '"></a>';
+            str += '<span class="gallery" href="' + APIURI + '/image' + img + '" title="' + items.author + " - " + items.title + '"></span>';
         });
         $("#slidecontainer").html(str);
-        $("#slidecontainer a.gallery").colorbox({rel:'gallery'})[0].click();
+        $("#slidecontainer .gallery").colorbox({rel:'gallery'})[0].click();
     }).fail(function(error) {
 
     }).always(function() {

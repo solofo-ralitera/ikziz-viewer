@@ -1,0 +1,26 @@
+.item {
+    width: 200px;
+    float: left;
+    border: 1px dashed gainsboro;
+}
+.item img {
+    display: block;
+    cursor: pointer;
+    width: 100%;
+}
+
+div.item .footer {
+    position: absolute;
+    bottom : 0;
+    width: 100%;
+    transition: all 0.5s;
+    text-align: center;
+}
+
+div.item .footer:hover {
+    background-color: rgba(255, 156, 151, 0.8);
+}
+
+div.item .footer .glyphicon{
+    cursor: pointer;
+}

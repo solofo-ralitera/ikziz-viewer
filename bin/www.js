@@ -7,6 +7,8 @@ const  Fs    = require('fs'),
 
 const ROOT = "D:/projets/csharp/ikziz/ikziz/bin/Debug";
 
+let ImageLists = [];
+
 Http.createServer(function(request, response) {
     let parsedUrl = Url.parse(request.url, true);
     let aUrl = parsedUrl.pathname.split("/");
@@ -61,6 +63,9 @@ function allBooks(response, parsedUrl) {
         // Read root dir
         ROOT
     ).then((ret) => {
+        if(ImageLists.length > 0) {
+            return Promise.resolve(ImageLists);
+        }
         // Read all subdir
         let promises = [];
         ret.forEach((dir,idx) => {
@@ -70,11 +75,13 @@ function allBooks(response, parsedUrl) {
         });
         return Promise.all(promises);
     }).then((directories) => {
-        // TODO directories GLOBAL
+        if(ImageLists.length == 0) {
+            ImageLists = directories.shuffle();
+        }
 
         // Format result
         let ret = [], aDir = [];
-        directories.forEach((dirs, idx) => {
+        ImageLists.forEach((dirs, idx) => {
             dirs.forEach((dir) => {
                 try {
                     if (Fs.lstatSync(dir + "/img_1.jpg").isFile()) {
@@ -83,9 +90,16 @@ function allBooks(response, parsedUrl) {
 
                         // Filter
                         if (typeof parsedUrl.query.filter != "undefined" && parsedUrl.query.filter) {
-                            let filter = parsedUrl.query.filter.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
+                            let filters = parsedUrl.query.filter.split(" ");
                             let formatItemPath = itemPath.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
-                            if (formatItemPath.search(filter) <= 0) {
+                            let found = false;
+                            filters.forEach(function(filter) {
+                                filter = filter.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
+                                if (formatItemPath.search(filter) > 0) {
+                                    found = true;
+                                }
+                            });
+                            if(found == false) {
                                 return false;
                             }
                         }
@@ -205,6 +219,18 @@ String.prototype.ucfirst = function() {
     return this.toLowerCase().replace(/(?:(^.{1})|\ [a-z]{1})/g, function(a){
         return a.toUpperCase();
     })
+}
+
+/**
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items The array containing the items.
+ */
+Array.prototype.shuffle = function() {
+    for (let i = this.length; i; i--) {
+        let j = Math.floor(Math.random() * i);
+        [this[i - 1], this[j]] = [this[j], this[i - 1]];
+    }
+    return this;
 }
 
 String.prototype.removeDiacritics = function() {
