@@ -70,6 +70,8 @@ function allBooks(response, parsedUrl) {
         });
         return Promise.all(promises);
     }).then((directories) => {
+        // TODO directories GLOBAL
+
         // Format result
         let ret = [], aDir = [];
         directories.forEach((dirs, idx) => {
@@ -183,7 +185,6 @@ function book(response, parsedUrl, path) {
             let sb = parseInt(b.split("/").pop().replace(/[^0-9]/g, ""));
             return sa - sb;
         });
-
         sendResponse(response, 200, ret);
     }).catch((err) => {
         console.error(err);
@@ -195,9 +196,11 @@ function book(response, parsedUrl, path) {
 String.prototype.authorForHuman = function() {
     return this.replace(/-/g, " ").ucfirst();
 }
+
 String.prototype.titleForHuman = function() {
     return this.replace(/-/g, " ");
 }
+
 String.prototype.ucfirst = function() {
     return this.toLowerCase().replace(/(?:(^.{1})|\ [a-z]{1})/g, function(a){
         return a.toUpperCase();
@@ -296,5 +299,4 @@ String.prototype.removeDiacritics = function() {
         str = str.replace(defaultDiacriticsRemovalMap[i].letters, defaultDiacriticsRemovalMap[i].base);
     }
     return str;
-
 }

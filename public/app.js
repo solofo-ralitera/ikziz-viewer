@@ -17,8 +17,8 @@ $(function () {
 });
 
 $.fn.masonryImagesReveal = function ($items) {
-    var msnry = this.data('masonry');
-    var itemSelector = msnry.options.itemSelector;
+    let msnry = this.data('masonry');
+    let itemSelector = msnry.options.itemSelector;
     // hide by default
     $items.hide();
     // append to container
@@ -26,7 +26,7 @@ $.fn.masonryImagesReveal = function ($items) {
     $items.imagesLoaded().progress(function (imgLoad, image) {
         // get item
         // image is imagesLoaded class, not <img>, <img> is image.img
-        var $item = $(image.img).parents(itemSelector);
+        let $item = $(image.img).parents(itemSelector);
         // un-hide item
         $item.show();
         // masonry does its thing
@@ -80,7 +80,7 @@ function loadImages(resetView) {
             addItem(item);
         });
 
-        var $container = $('#container').masonry({
+        let $container = $('#container').masonry({
             itemSelector: '.item',
             columnWidth: 200
         });
@@ -97,7 +97,7 @@ function addItem(item) {
     let newItem = document.createElement("div");
     newItem.setAttribute('data-path', item.path);
     newItem.setAttribute('data-uuid', item.uuid);
-    newItem.className = "item"
+    newItem.className = "item";
     newItem.innerHTML = '<img src="'+ APIURI + "/image" + item.thumb +'">';
     newItem.onclick = function() {
         let path = $(this).attr('data-path');
@@ -123,77 +123,16 @@ function loadSlider(path, uuid) {
         url: APIURI + "/book/" + encodeURIComponent(path),
         context: document.body
     }).done(function(items) {
-        $("#jssorcontainer").html($("#templatejssor").html());
 
+        let str = "";
         items.files.forEach(function(img) {
-            $("#jssorcontainer .jssor_slidecontainer").append(
-                '<div data-p="144.50">' +
-                    '<img data-u="image" src="' + APIURI + '/image' + img + '" />'+
-                    '<img data-u="thumb" src="' + APIURI + '/image' + img + '" />'+
-                '</div>'
-            );
+            str += '<a class="gallery" href="' + APIURI + '/image' + img + '" title="' + items.author + " - " + items.title + '"></a>';
         });
-
-        document.getElementById("modalcontainer").innerHTML = $("#modalcontainer").html();
-
-        $("#modalcontainer .book-title").html(items.author + " - " + items.title);
-
-        $('[data-remodal-id=modal]').remodal({}).open();
-
-        $("#modalcontainer .jssor-container,#modalcontainer .jssor_slidecontainer").css({
-            "height": (items.height + 120) + "px"
-        });
-        jssor_1_slider_init("jssorcontainer");
-
-        setTimeout(function() {
-            $("#jssorcontainer img[data-u=image]").css({
-                "width" : "auto",
-                "height" : "auto",
-                "left" : "",
-                "position" : ""
-            });
-        }, 1000);
+        $("#slidecontainer").html(str);
+        $("#slidecontainer a.gallery").colorbox({rel:'gallery'})[0].click();
     }).fail(function(error) {
 
     }).always(function() {
 
     });
 }
-
-jssor_1_slider_init = function(container) {
-    let jssor_1_options = {
-        $AutoPlay: true,
-        $SlideshowOptions: {
-            $Class: $JssorSlideshowRunner$,
-            $TransitionsOrder: 1
-        },
-        $ArrowNavigatorOptions: {
-            $Class: $JssorArrowNavigator$
-        },
-        $ThumbnailNavigatorOptions: {
-            $Class: $JssorThumbnailNavigator$,
-            $Cols: 10,
-            $SpacingX: 8,
-            $SpacingY: 8,
-            $Align: 360
-        }
-    };
-    let jssor_1_slider = new $JssorSlider$(container, jssor_1_options);
-    /*responsive code begin*/
-    /*you can remove responsive code if you don't want the slider scales while window resizing*/
-    function ScaleSlider() {
-        let refSize = jssor_1_slider.$Elmt.parentNode.clientWidth;
-        if (refSize) {
-            refSize = Math.min(refSize, 800);
-            jssor_1_slider.$ScaleWidth(refSize);
-        }
-        else {
-            window.setTimeout(ScaleSlider, 30);
-        }
-    }
-    ScaleSlider();
-    $Jssor$.$AddEvent(window, "load", ScaleSlider);
-    $Jssor$.$AddEvent(window, "resize", ScaleSlider);
-    $Jssor$.$AddEvent(window, "orientationchange", ScaleSlider);
-    /*responsive code end*/
-};
