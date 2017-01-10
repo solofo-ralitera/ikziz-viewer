@@ -2,30 +2,18 @@
   "name": "angular-2",
   "version": "1.0.0",
   "scripts": {
-    "_start": "concurrently \"npm run tsc:w\" \"npm run lite\" \"node ./bin/www.js\"",
-    "start": "concurrently \"npm run tsc:w\" \"npm run lite\"",
-    "tsc": "tsc",
-    "tsc:w": "tsc -w",
-    "lite": "lite-server",
-    "typings": "typings",
-    "postinstall": "typings install"
+    "start": "concurrently \"npm run lite\"",
+    "_start": "concurrently \"npm run lite\" \"node ./bin/www.js\"",
+    "lite": "lite-server"
   },
   "license": "ISC",
   "dependencies": {
-    "@types/jquery": "^2.0.39",
-    "angular2": "2.0.0-beta.13",
     "bootstrap": "^3.3.7",
-    "es6-shim": "^0.35.0",
     "image-size": "^0.5.1",
-    "reflect-metadata": "0.1.2",
-    "rxjs": "5.0.0-beta.2",
-    "systemjs": "0.19.25",
-    "zone.js": "0.6.6"
+    "locallydb": "0.0.9"
   },
   "devDependencies": {
     "concurrently": "^2.0.0",
-    "lite-server": "^2.1.0",
-    "typescript": "^1.8.9",
-    "typings": "^0.7.11"
+    "lite-server": "^2.1.0"
   }
 }

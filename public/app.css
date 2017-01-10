@@ -1,3 +1,7 @@
+#headercollection {
+    text-align: center;
+}
+
 .item {
     width: 200px;
     float: left;
@@ -15,12 +19,22 @@ div.item .footer {
     width: 100%;
     transition: all 0.5s;
     text-align: center;
+    min-height: 45px;
+    color: transparent;
 }
 
 div.item .footer:hover {
+    color: #000;
     background-color: rgba(255, 156, 151, 0.8);
 }
 
-div.item .footer .glyphicon{
+.collectionitem{
+    vertical-align: bottom;
     cursor: pointer;
+}
+.collectionitem:hover,
+.collectionitem.selected
+{
+    color: darkorchid;
+    font-size: 1.5em;
 }

@@ -1,17 +1,58 @@
 let IMAGE_LIMIT = 40;
 let IMG_FILTER = "";
 
+let CollectionFilters = [];
+let Collections = [
+    {
+        collection : "thumbsup",
+        class : "glyphicon glyphicon-thumbs-up"
+    },
+    {
+        collection : "toread",
+        class : "glyphicon glyphicon-bookmark"
+    },
+    {
+        collection : "favorite",
+        class : "glyphicon glyphicon-star"
+    }
+];
+
 $(function () {
     // Load all image (paginated)
-    observer.observe(document.getElementById("scrollLoader"));
-    $("#searchinput").keydown(function(event) {
+    observer.observe(document.getElementById('scrollLoader'));
+    // search input
+    $('#searchinput').keydown(function(event) {
         if ( event.which == 13 ) {
             event.preventDefault();
             IMG_FILTER = $(this).val();
-            currentOffset = 0;
             loadImages(true);
         }
     });
+    // header collection
+    let collections = [];
+    Collections.forEach(function(collection) {
+        collections.push('<i class="collectionitem '+collection.class+'" data-collection="'+collection.collection+'"></i>');
+    });
+    $('#headercollection').html(collections.join('&nbsp;'));
+    $('#headercollection').find('.collectionitem').click(function(el) {
+        let i = CollectionFilters.indexOf($(el.target).attr('data-collection'));
+        if(i > -1) {
+            CollectionFilters.splice(i, 1);
+        }else {
+            CollectionFilters.push($(el.target).attr('data-collection'));
+        }
+        loadImages(true);
+    });
+    setInterval(function() {
+        //$('#headercollection .collectionitem').removeClass('selected');
+        Collections.forEach(function(collection) {
+            if(CollectionFilters.indexOf(collection.collection) > -1) {
+                $('#headercollection .collectionitem[data-collection='+ collection.collection +']').addClass('selected');
+            }else {
+                $('#headercollection .collectionitem[data-collection='+ collection.collection +']').removeClass('selected');
+            }
+        });
+    }, 300);
 
     setInterval(setBgImg, 10000);
 });
@@ -58,6 +99,8 @@ let observer = new IntersectionObserver(function (entries) {
 let currentOffset = 0;
 let imagesIsLoading = false;
 function loadImages(resetView) {
+    if(resetView) currentOffset = 0;
+
     if(imagesIsLoading) return false;
 
     // return if no more page
@@ -65,7 +108,7 @@ function loadImages(resetView) {
 
     imagesIsLoading = true;
     $.ajax({
-        url: APIURI + "/allBooks?offset=" + currentOffset + "&limit=" + IMAGE_LIMIT + "&filter=" + encodeURIComponent(IMG_FILTER),
+        url: APIURI + "/allBooks?offset=" + currentOffset + "&limit=" + IMAGE_LIMIT + "&filter=" + encodeURIComponent(IMG_FILTER) + "&collection=" + encodeURIComponent(JSON.stringify(CollectionFilters)),
         context: document.body
     }).done(function(items) {
         currentOffset += items.length;
@@ -99,15 +142,33 @@ function addItem(item) {
     newItem.setAttribute('data-uuid', item.uuid);
     newItem.className = "item";
     $(newItem).append('<img src="'+ APIURI + "/image" + item.thumb +'">');
+
+    let collections = [];
+    Collections.forEach(function(collection) {
+        collections.push('<i class="collectionitem '+collection.class+'" data-collection="'+collection.collection+'" data-uuid="'+item.uuid+'"></i>');
+    });
+
     $(newItem).append(
         '<div class="footer">' +
-            '<i class="glyphicon glyphicon-thumbs-up setthumbsup"></i>'+
-            '&nbsp;' +
-            '<i class="glyphicon glyphicon-heart-empty setheart"></i>'+
-            '&nbsp;' +
-            '<i class="glyphicon glyphicon-shopping-cart setshoppingcart"></i>'+
+            collections.join('&nbsp;') +
+            '<br>' +
+            '<small>' + item.author + ' - ' + item.title + '</small>'+
+
         '</div>'
     );
+    $(newItem).find("i.collectionitem").click(function(el){
+        $.ajax({
+            url: APIURI + "/collection/" + encodeURIComponent($(el.target).attr('data-collection')) + "/" + encodeURIComponent($(el.target).attr('data-uuid')),
+            context: document.body
+        }).done(function(items) {
+
+        }).fail(function(error) {
+
+        }).always(function() {
+
+        });
+    });
+
     $(newItem).find("img")
         .attr('data-path', item.path)
         .attr('data-uuid', item.uuid)

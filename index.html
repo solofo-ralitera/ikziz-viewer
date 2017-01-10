@@ -15,27 +15,6 @@
     <script src="public/jquery.colorbox-min.js"></script>
 
     <script src="public/app.js"></script>
-
-    <!-- Load libraries (Note: IE required polyfills, in this exact order_ -->
-    <!--script src="node_modules/es6-shim/es6-shim.min.js"></script>
-    <script src="node_modules/systemjs/dist/system-polyfills.js"></script>
-    <script src="node_modules/angular2/es6/dev/src/testing/shims_for_IE.js"></script>
-    <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
-    <script src="node_modules/systemjs/dist/system.src.js"></script>
-    <script src="node_modules/rxjs/bundles/Rx.js"></script>
-    <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
-    <script>
-        System.config({
-            packages: {
-                app: {
-                    format: 'register',
-                    defaultExtension: 'js'
-                }
-            }
-        });
-        System.import('app/js/main').then(null, console.error.bind(console));
-    </script-->
-
     <script>
         const APIURI = "http://localhost:8080";
     </script>
@@ -52,10 +31,11 @@
     <div class="form-group has-feedback navbar navbar-default navbar-fixed-top">
         <input type="text" class="form-control" placeholder="Search..." id="searchinput" />
         <i class="glyphicon glyphicon-search form-control-feedback"></i>
+        <div id="headercollection"></div>
     </div>
 
     <div class="container-fluid">
-        <br />
+        <br /><br /><br />
         <hr />
         <div id="container"></div>
         <div id="imagesgallery"></div>

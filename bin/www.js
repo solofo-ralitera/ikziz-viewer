@@ -3,11 +3,13 @@
 const  Fs    = require('fs'),
     Http = require("http"),
     Url = require("url"),
-    sizeOf = require('image-size');
+    sizeOf = require('image-size'),
+    LocallyDb = require('locallydb');
 
 const ROOT = "D:/projets/csharp/ikziz/ikziz/bin/Debug";
 
 let ImageLists = [];
+let Db = new LocallyDb('./database');
 
 Http.createServer(function(request, response) {
     let parsedUrl = Url.parse(request.url, true);
@@ -79,6 +81,15 @@ function allBooks(response, parsedUrl) {
             ImageLists = directories.shuffle();
         }
 
+        // collection filter
+        let CollectionFilters = {};
+        if (typeof parsedUrl.query.collection != "undefined" && parsedUrl.query.collection) {
+            let collections = JSON.parse(parsedUrl.query.collection);
+            collections.forEach((col) => {
+                CollectionFilters[col] = Db.collection(col);
+            });
+        }
+
         // Format result
         let ret = [], aDir = [];
         ImageLists.forEach((dirs, idx) => {
@@ -87,28 +98,48 @@ function allBooks(response, parsedUrl) {
                     if (Fs.lstatSync(dir + "/img_1.jpg").isFile()) {
                         aDir = dir.split("/");
                         let itemPath = dir.replace(ROOT, "");
+                        let uuid = itemPath.replace(/[\/.-]/g, "_");
+
+                        let found = true;
 
                         // Filter
                         if (typeof parsedUrl.query.filter != "undefined" && parsedUrl.query.filter) {
                             let filters = parsedUrl.query.filter.split(" ");
                             let formatItemPath = itemPath.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
-                            let found = false;
+                            found = false;
                             filters.forEach(function(filter) {
                                 filter = filter.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
-                                if (formatItemPath.search(filter) > 0) {
+                                if (formatItemPath.search(filter) >= 0) {
                                     found = true;
                                 }
                             });
-                            if(found == false) {
-                                return false;
+                        }
+
+                        // Filter collection
+                        if(Object.keys(CollectionFilters).length > 0) {
+                            found = false;
+                            for(let collection in CollectionFilters) {
+                                if(CollectionFilters[collection]) {
+                                    let res = CollectionFilters[collection].where({
+                                        uuid : uuid
+                                    });
+                                    if(res.items && res.items.length > 0) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
 
+                        if(found == false) {
+                            return false;
+                        }
+
                         ret.push({
-                            uuid: itemPath.replace(/[\/.-]/g, "_"),
+                            uuid: uuid,
                             path: itemPath,
-                            title: aDir.pop(),
-                            author: aDir.pop(),
+                            title: aDir.pop().titleForHuman(),
+                            author: aDir.pop().authorForHuman(),
                             thumb: dir.replace(ROOT, "") + "/img_1.jpg",
                         });
                     }
@@ -207,6 +238,25 @@ function book(response, parsedUrl, path) {
 
 }
 
+function collection(response, parsedUrl, collection, uuid) {
+    collection = decodeURIComponent(collection);
+
+    let dbCollection = Db.collection(collection);
+    let res = dbCollection.where("@uuid == '" +uuid + "'");
+    if(! res.items || res.items.length == 0) {
+        dbCollection.insert({
+            uuid : uuid
+        });
+    }else {
+        res.items.forEach((item) => {
+            dbCollection.remove(item.cid);
+        });
+    }
+    dbCollection.save();
+
+    sendResponse(response, 200, []);
+}
+
 String.prototype.authorForHuman = function() {
     return this.replace(/-/g, " ").ucfirst();
 }
@@ -225,12 +275,21 @@ String.prototype.ucfirst = function() {
  * Shuffles array in place. ES6 version
  * @param {Array} a items The array containing the items.
  */
-Array.prototype.shuffle = function() {
-    for (let i = this.length; i; i--) {
-        let j = Math.floor(Math.random() * i);
-        [this[i - 1], this[j]] = [this[j], this[i - 1]];
+if (!Array.prototype.shuffle) {
+    Array.prototype.shuffle = function () {
+        for (let i = this.length; i; i--) {
+            let j = Math.floor(Math.random() * i);
+            [this[i - 1], this[j]] = [this[j], this[i - 1]];
+        }
+        return this;
     }
-    return this;
+}
+
+if (!Array.prototype.remove) {
+    Array.prototype.remove = function(val) {
+        var i = this.indexOf(val);
+        return i>-1 ? this.splice(i, 1) : [];
+    };
 }
 
 String.prototype.removeDiacritics = function() {
