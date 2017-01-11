@@ -2,20 +2,7 @@ let IMAGE_LIMIT = 40;
 let IMG_FILTER = "";
 
 let CollectionFilters = [];
-let Collections = [
-    {
-        collection : "thumbsup",
-        class : "glyphicon glyphicon-thumbs-up"
-    },
-    {
-        collection : "toread",
-        class : "glyphicon glyphicon-bookmark"
-    },
-    {
-        collection : "favorite",
-        class : "glyphicon glyphicon-star"
-    }
-];
+let Collections = module.exports.Collections;
 
 $(function () {
     // Load all image (paginated)
@@ -31,9 +18,14 @@ $(function () {
     // header collection
     let collections = [];
     Collections.forEach(function(collection) {
-        collections.push('<i class="collectionitem '+collection.class+'" data-collection="'+collection.collection+'"></i>');
+        collections.push(
+            '<li class="collectionitem" data-collection="' + collection.collection + '">' +
+                '<i class="' + collection.class + '"></i>' +
+                collection.label +
+            '</li>'
+        );
     });
-    $('#headercollection').html(collections.join('&nbsp;'));
+    $('#headercollection').html(collections.join(''));
     $('#headercollection').find('.collectionitem').click(function(el) {
         let i = CollectionFilters.indexOf($(el.target).attr('data-collection'));
         if(i > -1) {
@@ -145,7 +137,11 @@ function addItem(item) {
 
     let collections = [];
     Collections.forEach(function(collection) {
-        collections.push('<i class="collectionitem '+collection.class+'" data-collection="'+collection.collection+'" data-uuid="'+item.uuid+'"></i>');
+        let cls = "";
+        if(item.collections.indexOf(collection.collection) > -1) {
+            cls = "selected";
+        }
+        collections.push('<i class="collectionitem ' + collection.class + ' ' + cls + '" data-collection="' + collection.collection + '" data-uuid="' + item.uuid + '"></i>');
     });
 
     $(newItem).append(

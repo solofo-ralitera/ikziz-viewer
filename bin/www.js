@@ -4,7 +4,8 @@ const  Fs    = require('fs'),
     Http = require("http"),
     Url = require("url"),
     sizeOf = require('image-size'),
-    LocallyDb = require('locallydb');
+    LocallyDb = require('locallydb'),
+    Config = require('../Config');
 
 const ROOT = "D:/projets/csharp/ikziz/ikziz/bin/Debug";
 
@@ -81,13 +82,15 @@ function allBooks(response, parsedUrl) {
             ImageLists = directories.shuffle();
         }
 
-        // collection filter
-        let CollectionFilters = {};
+        // All collection
+        let Collections = {};
+        Config.Collections.forEach((col) => {
+            Collections[col.collection] = Db.collection(col.collection);
+        });
+        // Filter collection
+        let CollectionFilters = [];
         if (typeof parsedUrl.query.collection != "undefined" && parsedUrl.query.collection) {
-            let collections = JSON.parse(parsedUrl.query.collection);
-            collections.forEach((col) => {
-                CollectionFilters[col] = Db.collection(col);
-            });
+            CollectionFilters = JSON.parse(parsedUrl.query.collection);
         }
 
         // Format result
@@ -99,6 +102,7 @@ function allBooks(response, parsedUrl) {
                         aDir = dir.split("/");
                         let itemPath = dir.replace(ROOT, "");
                         let uuid = itemPath.replace(/[\/.-]/g, "_");
+                        let itemCollections = [];
 
                         let found = true;
 
@@ -116,19 +120,21 @@ function allBooks(response, parsedUrl) {
                         }
 
                         // Filter collection
-                        if(Object.keys(CollectionFilters).length > 0) {
+                        if(CollectionFilters.length > 0) {
                             found = false;
-                            for(let collection in CollectionFilters) {
-                                if(CollectionFilters[collection]) {
-                                    let res = CollectionFilters[collection].where({
-                                        uuid : uuid
-                                    });
-                                    if(res.items && res.items.length > 0) {
-                                        found = true;
-                                        break;
-                                    }
+                        }
+
+                        for(let col in Collections) {
+                            let res = Collections[col].where({
+                                uuid : uuid
+                            });
+                            if(res.items && res.items.length > 0) {
+                                itemCollections.push(col);
+
+                                if(CollectionFilters.indexOf(col) > -1) {
+                                    found = true;
                                 }
-                            }
+1                            }
                         }
 
                         if(found == false) {
@@ -141,6 +147,7 @@ function allBooks(response, parsedUrl) {
                             title: aDir.pop().titleForHuman(),
                             author: aDir.pop().authorForHuman(),
                             thumb: dir.replace(ROOT, "") + "/img_1.jpg",
+                            collections : itemCollections,
                         });
                     }
                 }catch(e) {

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="public/colorbox.css" />
     <script src="public/jquery.colorbox-min.js"></script>
 
+    <script src="Config.js"></script>
     <script src="public/app.js"></script>
     <script>
         const APIURI = "http://localhost:8080";
@@ -28,14 +29,24 @@
     </style>
 </head>
 <body>
-    <div class="form-group has-feedback navbar navbar-default navbar-fixed-top">
-        <input type="text" class="form-control" placeholder="Search..." id="searchinput" />
-        <i class="glyphicon glyphicon-search form-control-feedback"></i>
-        <div id="headercollection"></div>
-    </div>
+    <div class="navbar-fixed-top">
+        <div class="input-group">
+            <span class="input-group-addon">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="glyphicon glyphicon-menu-hamburger"></i>
+                        </a>
+                        <ul id="headercollection" class="dropdown-menu"></ul>
+                    </li>
+                </ul>
+            </span>
+            <input type="text" class="form-control" placeholder="Search..." id="searchinput" />
+            <i class="glyphicon glyphicon-search form-control-feedback"></i>
+        </div>
 
+    </div>
     <div class="container-fluid">
-        <br /><br /><br />
         <hr />
         <div id="container"></div>
         <div id="imagesgallery"></div>

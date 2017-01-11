@@ -1,5 +1,5 @@
-#headercollection {
-    text-align: center;
+.navbar-fixed-top .dropdown-toggle {
+    padding : 0px;
 }
 
 .item {
@@ -31,10 +31,11 @@ div.item .footer:hover {
 .collectionitem{
     vertical-align: bottom;
     cursor: pointer;
+    padding: 10px;
 }
 .collectionitem:hover,
 .collectionitem.selected
 {
     color: darkorchid;
-    font-size: 1.5em;
+    font-size: 1em;
 }
