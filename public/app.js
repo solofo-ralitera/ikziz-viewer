@@ -15,17 +15,18 @@ $(function () {
             loadImages(true);
         }
     });
+
     // header collection
     let collections = [];
     Collections.forEach(function(collection) {
         collections.push(
             '<li class="collectionitem" data-collection="' + collection.collection + '">' +
-                '<i class="' + collection.class + '"></i>' +
+                '<i class="' + collection.class + '"></i>&nbsp;' +
                 collection.label +
             '</li>'
         );
     });
-    $('#headercollection').html(collections.join(''));
+    $('#headercollection').html($('#headercollection').html().replace("{collection}", collections.join('')));
     $('#headercollection').find('.collectionitem').click(function(el) {
         let i = CollectionFilters.indexOf($(el.target).attr('data-collection'));
         if(i > -1) {
@@ -35,6 +36,57 @@ $(function () {
         }
         loadImages(true);
     });
+
+    // Author Right Panel
+    $('#author-panel').slideReveal({
+        trigger: $('#authorslink'),
+        position : 'right',
+        push: false,
+        width: '60%',
+    });
+    loadPanel('#authorpanel-container', APIURI + '/authors', function(response) {
+        $('#authorpanel-container .author-item').click(function() {
+            $('#author-panel').slideReveal('hide');
+            IMG_FILTER = $(this).html().replace(/ /g, "");
+            loadImages(true);
+        });
+    });
+    $('#authorinput').keydown(function(event) {
+        let reg = new RegExp($(this).val(), 'i');
+        $.each($('#authorpanel-container .author-item'), function(idx, item) {
+            if(reg.test($(item).html())) {
+                $(this).show();
+            }else {
+                $(this).hide();
+            }
+        });
+    });
+
+    // Tag cloud right panel
+    $('#tagcloud-panel').slideReveal({
+        trigger: $('#tagcloudlink'),
+        position : 'right',
+        push: false,
+        width: '60%',
+    });
+    loadPanel('#tagcloud-container', APIURI + '/tags', function(response) {
+        let str = "";
+        $.each(response, function(idx, item) {
+            str += '<a href="#" class="tagcloud-item" rel="' + item.weight + '">' + item.text + '</a>';
+        });
+        $('#tagcloud-container').html(str);
+        $('#tagcloud-container .tagcloud-item').click(function() {
+            $('#tagcloud-panel').slideReveal('hide');
+            IMG_FILTER = $(this).html().replace(/ /g, "");
+            loadImages(true);
+        });
+        $.fn.tagcloud.defaults = {
+            size: {start: 8, end: 15, unit: 'pt'},
+            color: {start: '#CDE', end: '#F52'}
+        };
+        $('#tagcloud-container a').tagcloud();
+    });
+
     setInterval(function() {
         //$('#headercollection .collectionitem').removeClass('selected');
         Collections.forEach(function(collection) {
@@ -45,7 +97,6 @@ $(function () {
             }
         });
     }, 300);
-
     setInterval(setBgImg, 10000);
 });
 
@@ -87,6 +138,22 @@ let observer = new IntersectionObserver(function (entries) {
     //root: document.querySelector('#scrollArea'),
     threshold: 1.0
 });
+
+function loadPanel(panelId, url, callback) {
+    $.ajax({
+        url: url,
+        context: document.body
+    }).done(function(items) {
+        if(items.content) {
+            $(panelId).html(items.content);
+        }
+        if(callback) callback(items);
+    }).fail(function(error) {
+
+    }).always(function() {
+
+    });
+}
 
 let currentOffset = 0;
 let imagesIsLoading = false;

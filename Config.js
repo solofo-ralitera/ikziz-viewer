@@ -11,7 +11,7 @@ module.exports = {
         },
         {
             collection : "toread",
-            class : "glyphicon glyphicon-bookmark",
+            class : "glyphicon glyphicon-eye-open",
             label : "Bookmark"
         },
         {

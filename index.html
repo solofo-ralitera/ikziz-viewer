@@ -6,10 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="public/jquery-3.1.1.min.js"></script>
+
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
     <script src="public/masonry.pkgd.min.js"></script>
     <script src="public/imagesloaded.pkgd.min.js"></script>
+    <script src="public/jquery.slidereveal.min.js"></script>
+
+    <!--link rel="stylesheet" href="public/jqcloud.min.css" />
+    <script src="public/jqcloud.min.js"></script-->
+    <script src="public/jquery-tagcloud.js"></script>
 
     <link rel="stylesheet" href="public/colorbox.css" />
     <script src="public/jquery.colorbox-min.js"></script>
@@ -37,15 +44,34 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             <i class="glyphicon glyphicon-menu-hamburger"></i>
                         </a>
-                        <ul id="headercollection" class="dropdown-menu"></ul>
+                        <ul id="headercollection" class="dropdown-menu">
+                            {collection}
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#" id="authorslink"><i class="glyphicon glyphicon-user"></i>&nbsp;Authors</a></li>
+                            <li><a href="#" id="tagcloudlink"><i class="glyphicon glyphicon-tag"></i>&nbsp;Tags</a></li>
+
+                        </ul>
                     </li>
                 </ul>
             </span>
             <input type="text" class="form-control" placeholder="Search..." id="searchinput" />
             <i class="glyphicon glyphicon-search form-control-feedback"></i>
         </div>
-
     </div>
+
+    <div id="author-panel" class="right-panel author-panel">
+        <hr />
+        <input type="text" class="form-control" id="authorinput" placeholder="Authors" />
+        <br />
+        <div id="authorpanel-container"></div>
+    </div>
+    <div id="tagcloud-panel" class="right-panel author-panel">
+        <hr />
+        <br />
+        <div id="tagcloud-container"></div>
+    </div>
+
+
     <div class="container-fluid">
         <hr />
         <div id="container"></div>

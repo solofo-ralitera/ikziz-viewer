@@ -56,6 +56,21 @@ function readDir(dir) {
         })
     })
 }
+
+function getImageList(lists) {
+    if(ImageLists.length > 0) {
+        return Promise.resolve(ImageLists);
+    }
+    // Read all subdir
+    let promises = [];
+    lists.forEach((dir,idx) => {
+        if(Fs.lstatSync(dir).isDirectory()) {
+            promises.push(readDir(dir));
+        }
+    });
+    return Promise.all(promises);
+}
+
 /**
  * Get all books
  *
@@ -66,17 +81,7 @@ function allBooks(response, parsedUrl) {
         // Read root dir
         ROOT
     ).then((ret) => {
-        if(ImageLists.length > 0) {
-            return Promise.resolve(ImageLists);
-        }
-        // Read all subdir
-        let promises = [];
-        ret.forEach((dir,idx) => {
-            if(Fs.lstatSync(dir).isDirectory()) {
-                promises.push(readDir(dir));
-            }
-        });
-        return Promise.all(promises);
+        return getImageList(ret);
     }).then((directories) => {
         if(ImageLists.length == 0) {
             ImageLists = directories.shuffle();
@@ -167,6 +172,75 @@ function allBooks(response, parsedUrl) {
             limit = parseInt(parsedUrl.query.limit);
         }
         ret = ret.slice(offset, offset + limit);
+        sendResponse(response, 200, ret);
+    }).catch((err) => {
+        console.error(err);
+        sendResponse(response, 500, []);
+    });
+}
+
+/**
+ * Get all tags
+ * @param response
+ * @param parsedUrl
+ */
+function tags(response, parsedUrl) {
+    readDir(
+        // Read root dir
+        ROOT
+    ).then((res) => {
+        return getImageList(res);
+    }).then((directories) => {
+        let ret = [];
+        directories.forEach((dirs, idx) => {
+            dirs.forEach((dir) => {
+                let file = dir.split('/');
+                ret = ret.concat(file.pop().titleForHuman().split(' '));
+                ret = ret.concat(file.pop().authorForHuman().split(' '));
+            });
+        });
+        ret.shuffle();
+        let counts = {};
+        for(let i = 0; i < ret.length; i++) {
+            let num = ret[i];
+            counts[num] = counts[num] ? counts[num]+1 : 1;
+        }
+        let result = [];
+        let article = ['the', 'les', 'des', 'a', 'an', 'un'];
+        for(let words in counts) {
+            if(words.length > 2 && counts[words] > 2 && article.indexOf(words.toLowerCase()) == -1) {
+                result.push({
+                    text : words.trim(),
+                    weight : counts[words]
+                });
+            }
+        }
+
+        sendResponse(response, 200, result);
+    }).catch((err) => {
+        console.error(err);
+        sendResponse(response, 500, []);
+    });
+}
+
+/**
+ * Get author list
+ * @param response
+ * @param parsedUrl
+ */
+function authors(response, parsedUrl) {
+    let ret = {};
+    ret.content = "";
+    readDir(
+        // Read root dir
+        ROOT
+    ).then((res) => {
+        let authors = [];
+        res.sort();
+        res.forEach((file) => {
+            authors.push('<span class="author-item">' + file.split('/').pop().authorForHuman() + '</span>');
+        });
+        ret.content = authors.join('');
         sendResponse(response, 200, ret);
     }).catch((err) => {
         console.error(err);
