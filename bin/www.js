@@ -5,7 +5,8 @@ const  Fs    = require('fs'),
     Url = require("url"),
     sizeOf = require('image-size'),
     LocallyDb = require('locallydb'),
-    Config = require('../Config');
+    Config = require('../Config'),
+    PackageJson = require('../package.json');
 
 const ROOT = "D:/projets/csharp/ikziz/ikziz/bin/Debug";
 
@@ -123,12 +124,12 @@ function allBooks(response, parsedUrl) {
 
                         // Filter
                         if (typeof parsedUrl.query.filter != "undefined" && parsedUrl.query.filter) {
-                            let filters = parsedUrl.query.filter.split(" ");
+                            let filters = parsedUrl.query.filter.trim().split(" ");
                             let formatItemPath = itemPath.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
                             found = false;
                             filters.forEach(function(filter) {
                                 filter = filter.toLowerCase().removeDiacritics().replace(/[^\w]/g, "");
-                                if (formatItemPath.search(filter) >= 0) {
+                                if (filter != '' && formatItemPath.search(filter) >= 0) {
                                     found = true;
                                 }
                             });
@@ -216,7 +217,7 @@ function tags(response, parsedUrl) {
             counts[num] = counts[num] ? counts[num]+1 : 1;
         }
         let result = [];
-        let article = ['the', 'les', 'des', 'a', 'an', 'un'];
+        let article = ['the', 'a', 'an', 'un', 'une', 'des', 'le', 'la', 'les', 'et', 'ou', 'and'];
         for(let words in counts) {
             if(words.length > 2 && counts[words] > 2 && article.indexOf(words.toLowerCase()) == -1) {
                 result.push({
@@ -328,6 +329,13 @@ function book(response, parsedUrl, path) {
 
 }
 
+/**
+ * Associate item to collection
+ * @param response
+ * @param parsedUrl
+ * @param collection
+ * @param uuid
+ */
 function collection(response, parsedUrl, collection, uuid) {
     collection = decodeURIComponent(collection);
 
@@ -347,6 +355,51 @@ function collection(response, parsedUrl, collection, uuid) {
     sendResponse(response, 200, []);
 }
 
+/**
+ * Get informations
+ * @param response
+ * @param parsedUrl
+ * @param path
+ */
+function informations(response, parsedUrl, path) {
+    readDir(
+        // Read root dir
+        ROOT
+    ).then((ret) => {
+        return getImageList(ret);
+    }).then((directories) => {
+        let result = {};
+
+        result.siteName = Config.SITE_NAME;
+
+        // Get total author & title
+        result.authors = directories.length;
+        result.titles = 0;
+        directories.forEach((item) => {
+            result.titles += item.length;
+        });
+
+        // Api version
+        result.version = PackageJson.version;
+        result.license = PackageJson.license;
+
+        // Collection number
+        result.collections = [];
+        Config.Collections.forEach((col) => {
+            result.collections.push({
+                name : col.collection,
+                title : col.label,
+                number : Db.collection(col.collection).items.length
+            });
+        });
+
+
+        sendResponse(response, 200, result);
+    }).catch((err) => {
+        console.error(err);
+        sendResponse(response, 500, []);
+    });
+}
 
 /***********************
  ****** PROTOTYPE ******

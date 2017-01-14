@@ -91,6 +91,9 @@ div.item .footer:hover {
     color: darkorchid;
 }
 
-.cboxPhoto {
-
+.popover-navigation button[data-role=no_more],
+.popover-navigation button[data-role=ok]
+{
+    diplay:none;
+    visibility: hidden;
 }

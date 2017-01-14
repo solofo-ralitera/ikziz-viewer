@@ -1,12 +1,12 @@
 {
-  "name": "angular-2",
+  "name": "zizki-viewer",
   "version": "1.0.0",
   "scripts": {
     "start": "concurrently \"npm run lite\"",
     "_start": "concurrently \"node ./bin/www.js\" \"npm run lite\"",
     "lite": "lite-server"
   },
-  "license": "ISC",
+  "license": "GPL",
   "dependencies": {
     "bootstrap": "^3.3.7",
     "image-size": "^0.5.1",

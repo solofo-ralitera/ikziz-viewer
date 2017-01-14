@@ -7,7 +7,7 @@ let Collections = module.exports.Collections;
 $(function () {
     // Load all image (paginated)
     observer.observe(document.getElementById('scrollLoader'));
-    // search input
+    // SEARCH INPUT
     $('#searchinput').keydown(function(event) {
         if ( event.which == 13 ) {
             event.preventDefault();
@@ -16,7 +16,7 @@ $(function () {
         }
     });
 
-    // header collection
+    // MENU COLLECTIONS
     let collections = [];
     Collections.forEach(function(collection) {
         collections.push(
@@ -37,7 +37,7 @@ $(function () {
         loadImages(true);
     });
 
-    // Author Right Panel
+    // AUTHOR RIGHT PANEL
     $('#author-panel').slideReveal({
         trigger: $('#authorslink'),
         position : 'right',
@@ -62,7 +62,7 @@ $(function () {
         });
     });
 
-    // Tag cloud right panel
+    // TAG CLOUD RIGHT PANEL
     $('#tagcloud-panel').slideReveal({
         trigger: $('#tagcloudlink'),
         position : 'right',
@@ -81,10 +81,35 @@ $(function () {
             loadImages(true);
         });
         $.fn.tagcloud.defaults = {
-            size: {start: 8, end: 15, unit: 'pt'},
-            color: {start: '#CDE', end: '#F52'}
+            size: {start: 10, end: 20, unit: 'pt'},
+            color: {start: '#CDE', end: '#FF3600'}
         };
         $('#tagcloud-container a').tagcloud();
+    });
+
+    // INFORMATION
+    $.notiModal.init("infoModal", {
+        title: "Informations",
+        content: ""
+    });
+    $("#infomenu").click(function() {
+        $('.infoModal .popover-content').html('');
+        $.notiModal.get("infoModal").show();
+        loadPanel(null,  APIURI + '/informations', function(response) {
+            let str = '';
+            str += '<div class="h4">'+response.siteName+'<span class="h5">&nbsp;'+response.version+'</span></div>';
+            str += '<div class="h5">'+response.license+'</div>';
+            str += '';
+            str += '<hr />';
+            str += '<div class="h5">Authors : '+response.authors+'</div>';
+            str += '<div class="h5">Titles : '+response.titles+'</div>';
+            str += '<hr />';
+            response.collections.forEach(function(item) {
+                str += '<div class="h5">' + item.title + ' : ' + item.number + '</div>';
+            });
+            $('.infoModal .popover-content').html(str);
+
+        });
     });
 
     setInterval(function() {
