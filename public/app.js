@@ -267,7 +267,11 @@ function loadSlider(path, uuid) {
             str += '<span class="gallery" href="' + APIURI + '/image' + img + '" title="' + items.author + " - " + items.title + '"></span>';
         });
         $("#slidecontainer").html(str);
-        $("#slidecontainer .gallery").colorbox({rel:'gallery'})[0].click();
+        $("#slidecontainer .gallery").colorbox({
+            rel:'gallery',
+            scalePhotos: true,
+            maxWidth: '100%'
+        })[0].click();
     }).fail(function(error) {
 
     }).always(function() {
