@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "concurrently \"npm run lite\"",
-    "__start": "concurrently \"node ./bin/www.js\" \"npm run lite\"",
+    "_start": "concurrently \"node ./bin/www.js\" \"npm run lite\"",
     "lite": "lite-server"
   },
   "license": "GPL",
